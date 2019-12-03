@@ -15,6 +15,8 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
+        self.count = 0
+        self.grown = False
 
 
     def _hash(self, key):
@@ -44,8 +46,17 @@ class HashTable:
         '''
         return self._hash(key) % self.capacity
 
+    def _update_size(self):
+        ratio = self.count/self.capacity
+        if ratio>.7:
+            self.resize()
+            self.grown = True
+        elif ratio<.2 and self.grown:
+            self.resize(.5)
+        else:
+            return
 
-    def insert(self, key, value, cache=None):
+    def insert(self, key, value, cache=None, resize = False):
         '''
         Store the value with the given key.
         Hash collisions should be handled with Linked List Chaining.
@@ -72,6 +83,10 @@ class HashTable:
             cur_pair.next = pair
         else:
             cache[index] = pair
+            
+        self.count += 1
+        if not resize:    
+            self._update_size()
 
 
     def remove(self, key):
@@ -86,19 +101,20 @@ class HashTable:
                 return
             elif self.storage[index].key == key:
                 self.storage[index] = self.storage[index].next
+                self.count-=1
+                self._update_size()
                 return
             else:
                 cur_pair = self.storage[index]
                 while cur_pair.next:
                     if cur_pair.next.key == key:
                         cur_pair.next = cur_pair.next.next
+                        self.count-=1
+                        self._update_size()
                         return
                     else:
                         cur_pair = cur_pair.next
             print("Error: that key does not exist")
-
-
-
 
 
     def retrieve(self, key):
@@ -123,21 +139,22 @@ class HashTable:
             return self.storage[index].value
 
 
-    def resize(self):
+    def resize(self, factor=2):
         '''
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
         Fill this in.
         '''
-        self.capacity*=2
+        temp = float(self.capacity)
+        self.capacity= int(temp*factor)
         new_storage = [None]*self.capacity
-        
+        self.count = 0
         for head in self.storage:
             if head:
-                self.insert(head.key, head.value, new_storage)
+                self.insert(head.key, head.value, new_storage, True)
                 while head.next:
                     head = head.next
-                    self.insert(head.key, head.value, new_storage)
+                    self.insert(head.key, head.value, new_storage, True)
         self.storage = new_storage
 
 
@@ -148,7 +165,7 @@ if __name__ == "__main__":
     ht.insert("line_1", "Tiny hash table")
     ht.insert("line_2", "Filled beyond capacity")
     ht.insert("line_3", "Linked list saves the day!")
-    ht._hash_djb2("Adam")
+    print(ht._hash_djb2("Adam"))
     # print("")
 
     # Test storing beyond capacity
