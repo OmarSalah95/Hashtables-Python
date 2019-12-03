@@ -22,7 +22,7 @@ class HashTable:
         Hash an arbitrary key and return an integer.
         You may replace the Python hash with DJB2 as a stretch goal.
         '''
-        return self._hash_djb2(key)
+        return hash(key)
 
 
     def _hash_djb2(self, key):
@@ -30,7 +30,11 @@ class HashTable:
         Hash an arbitrary key using DJB2 hash
         OPTIONAL STRETCH: Research and implement DJB2
         '''
-        return hash(key)
+        hash_value = 5381
+    
+        for char in key:
+            hash_value = ((hash_value << 5)+hash_value) + int(char, 0)
+        return hash_value
 
 
     def _hash_mod(self, key):
@@ -41,30 +45,33 @@ class HashTable:
         return self._hash(key) % self.capacity
 
 
-    def insert(self, key, value):
+    def insert(self, key, value, cache=None):
         '''
         Store the value with the given key.
         Hash collisions should be handled with Linked List Chaining.
         Fill this in.
         '''
-        key=self._hash(key)
+        if cache == None:
+            cache = self.storage
+            
         index = self._hash_mod(key)
         pair = LinkedPair(key, value)
         
-        if self.storage[index] != None:
+        if cache[index] != None:
             # Add next handling
-            cur_pair = self.storage[index]
+            cur_pair = cache[index]
             if cur_pair.key ==key:
                 cur_pair.value=value
                 return
             while cur_pair.next != None:
                 cur_pair = cur_pair.next
-                if cur_pair.key ==key:
+                if cur_pair.key==key:
                     cur_pair.value=value
                     return
+            
             cur_pair.next = pair
         else:
-            self.storage[index] = pair
+            cache[index] = pair
 
 
 
@@ -74,7 +81,7 @@ class HashTable:
         Print a warning if the key is not found.
         Fill this in.
         '''
-        key = self._hash(key)
+        
         index = self._hash_mod(key)
         if self.storage[index] == None:
             return print("That Key does NOT exist")
@@ -82,14 +89,9 @@ class HashTable:
         elif self.storage[index].key == key:
                 self.storage[index] = self.storage[index].next
                 return
-            # self.storage[index].key != key:
-        
-        
+            
         else:
             cur_pair = self.storage[index]
-            # if cur_pair.key == key:
-            #     cur_pair = cur_pair.next
-            #     return
             while cur_pair.next is not None:
                 cur_pair = cur_pair.next
                 if cur_pair.key == key:
@@ -107,10 +109,11 @@ class HashTable:
         Returns None if the key is not found.
         Fill this in.
         '''
-        key = self._hash(key)
+        
         index = self._hash_mod(key)
         if self.storage[index] == None:
             return None
+        
         elif self.storage[index].key != key:
             cur_pair = self.storage[index]
             while cur_pair.next is not None:
@@ -118,7 +121,6 @@ class HashTable:
                 if cur_pair.key == key:
                     return cur_pair.value
             return None
-            # return self.storage[index].value
         else:
             return self.storage[index].value
 
