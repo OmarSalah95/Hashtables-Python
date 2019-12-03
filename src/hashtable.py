@@ -22,7 +22,7 @@ class HashTable:
         Hash an arbitrary key and return an integer.
         You may replace the Python hash with DJB2 as a stretch goal.
         '''
-        return hash(key)
+        return self._hash_djb2(key)
 
 
     def _hash_djb2(self, key):
@@ -33,7 +33,7 @@ class HashTable:
         hash_value = 5381
     
         for char in key:
-            hash_value = ((hash_value << 5)+hash_value) + int(char, 0)
+            hash_value = ((hash_value << 5)+hash_value) + ord(char)
         return hash_value
 
 
@@ -74,32 +74,30 @@ class HashTable:
             cache[index] = pair
 
 
-
     def remove(self, key):
-        '''
-        Remove the value stored with the given key.
-        Print a warning if the key is not found.
-        Fill this in.
-        '''
-        
-        index = self._hash_mod(key)
-        if self.storage[index] == None:
-            return print("That Key does NOT exist")
-        
-        elif self.storage[index].key == key:
+            '''
+            Remove the value stored with the given key.
+            Print a warning if the key is not found.
+            Fill this in.
+            '''
+            index = self._hash_mod(key)
+            if self.storage[index] == None:
+                print("Error: nothing at that index")
+                return
+            elif self.storage[index].key == key:
                 self.storage[index] = self.storage[index].next
                 return
-            
-        else:
-            cur_pair = self.storage[index]
-            while cur_pair.next is not None:
-                cur_pair = cur_pair.next
-                if cur_pair.key == key:
-                    cur_pair = cur_pair.next
-                    return
-        print("That key doesnt exist!")
-            
-            # return self.storage[index].value
+            else:
+                cur_pair = self.storage[index]
+                while cur_pair.next:
+                    if cur_pair.next.key == key:
+                        cur_pair.next = cur_pair.next.next
+                        return
+                    else:
+                        cur_pair = cur_pair.next
+            print("Error: that key does not exist")
+
+
 
 
 
@@ -134,6 +132,13 @@ class HashTable:
         self.capacity*=2
         new_storage = [None]*self.capacity
         
+        for head in self.storage:
+            if head:
+                self.insert(head.key, head.value, new_storage)
+                while head.next:
+                    head = head.next
+                    self.insert(head.key, head.value, new_storage)
+        self.storage = new_storage
 
 
 
@@ -143,8 +148,8 @@ if __name__ == "__main__":
     ht.insert("line_1", "Tiny hash table")
     ht.insert("line_2", "Filled beyond capacity")
     ht.insert("line_3", "Linked list saves the day!")
-
-    print("")
+    ht._hash_djb2("Adam")
+    # print("")
 
     # Test storing beyond capacity
     print(ht.retrieve("line_1"))
