@@ -30,10 +30,7 @@ class HashTable:
         Hash an arbitrary key using DJB2 hash
         OPTIONAL STRETCH: Research and implement DJB2
         '''
-        hash_value = 5381
-        for char in key:
-            hash_value = ((hash_value << 5)+hash_value) + char
-        return hash_value
+        return hash(key)
 
 
     def _hash_mod(self, key):
@@ -53,11 +50,21 @@ class HashTable:
         key=self._hash(key)
         index = self._hash_mod(key)
         pair = LinkedPair(key, value)
+        
         if self.storage[index] != None:
             # Add next handling
-            print("Collision Error")
-            return
-        self.storage[index] = value
+            cur_pair = self.storage[index]
+            if cur_pair.key ==key:
+                cur_pair.value=value
+                return
+            while cur_pair.next != None:
+                cur_pair = cur_pair.next
+                if cur_pair.key ==key:
+                    cur_pair.value=value
+                    return
+            cur_pair.next = pair
+        else:
+            self.storage[index] = pair
 
 
 
@@ -70,9 +77,28 @@ class HashTable:
         key = self._hash(key)
         index = self._hash_mod(key)
         if self.storage[index] == None:
-            print("Non-Existent Key!")
-            return
-        self.storage[index]=None
+            return print("That Key does NOT exist")
+        
+        elif self.storage[index].key == key:
+                self.storage[index] = self.storage[index].next
+                return
+            # self.storage[index].key != key:
+        
+        
+        else:
+            cur_pair = self.storage[index]
+            # if cur_pair.key == key:
+            #     cur_pair = cur_pair.next
+            #     return
+            while cur_pair.next is not None:
+                cur_pair = cur_pair.next
+                if cur_pair.key == key:
+                    cur_pair = cur_pair.next
+                    return
+        print("That key doesnt exist!")
+            
+            # return self.storage[index].value
+
 
 
     def retrieve(self, key):
@@ -85,6 +111,14 @@ class HashTable:
         index = self._hash_mod(key)
         if self.storage[index] == None:
             return None
+        elif self.storage[index].key != key:
+            cur_pair = self.storage[index]
+            while cur_pair.next is not None:
+                cur_pair = cur_pair.next
+                if cur_pair.key == key:
+                    return cur_pair.value
+            return None
+            # return self.storage[index].value
         else:
             return self.storage[index].value
 
