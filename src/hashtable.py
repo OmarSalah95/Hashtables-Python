@@ -20,19 +20,20 @@ class HashTable:
     def _hash(self, key):
         '''
         Hash an arbitrary key and return an integer.
-
         You may replace the Python hash with DJB2 as a stretch goal.
         '''
-        return hash(key)
+        return self._hash_djb2(key)
 
 
     def _hash_djb2(self, key):
         '''
         Hash an arbitrary key using DJB2 hash
-
         OPTIONAL STRETCH: Research and implement DJB2
         '''
-        pass
+        hash_value = 5381
+        for char in key:
+            hash_value = ((hash_value << 5)+hash_value) + char
+        return hash_value
 
 
     def _hash_mod(self, key):
@@ -46,45 +47,57 @@ class HashTable:
     def insert(self, key, value):
         '''
         Store the value with the given key.
-
         Hash collisions should be handled with Linked List Chaining.
-
         Fill this in.
         '''
-        pass
+        key=self._hash(key)
+        index = self._hash_mod(key)
+        pair = LinkedPair(key, value)
+        if self.storage[index] != None:
+            # Add next handling
+            print("Collision Error")
+            return
+        self.storage[index] = value
 
 
 
     def remove(self, key):
         '''
         Remove the value stored with the given key.
-
         Print a warning if the key is not found.
-
         Fill this in.
         '''
-        pass
+        key = self._hash(key)
+        index = self._hash_mod(key)
+        if self.storage[index] == None:
+            print("Non-Existent Key!")
+            return
+        self.storage[index]=None
 
 
     def retrieve(self, key):
         '''
         Retrieve the value stored with the given key.
-
         Returns None if the key is not found.
-
         Fill this in.
         '''
-        pass
+        key = self._hash(key)
+        index = self._hash_mod(key)
+        if self.storage[index] == None:
+            return None
+        else:
+            return self.storage[index].value
 
 
     def resize(self):
         '''
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
-
         Fill this in.
         '''
-        pass
+        self.capacity*=2
+        new_storage = [None]*self.capacity
+        
 
 
 
